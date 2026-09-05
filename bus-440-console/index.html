@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>BUS 440 · Mastery Console</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+<style>
+:root {
+  --bg: #eef1f8;
+  --bg-grid: rgba(79, 70, 229, 0.06);
+  --surface: #ffffff;
+  --surface-2: #f4f6fc;
+  --ink: #131a2c;
+  --ink-soft: #5b6478;
+  --ink-faint: #8b93a7;
+  --line: #dde2ee;
+  --accent: #4f46e5;
+  --accent-ink: #ffffff;
+  --accent-soft: #eef0fe;
+  --accent-glow: rgba(79, 70, 229, 0.35);
+  --amber: #d97706;
+  --amber-soft: #fff2df;
+  --good: #0f9d63;
+  --good-soft: #e5f8ee;
+  --shadow: 0 20px 40px -18px rgba(23, 26, 51, 0.22);
+  --shadow-sm: 0 8px 20px -12px rgba(23, 26, 51, 0.18);
+  --radius: 22px;
+  color-scheme: light;
+}
+html[data-theme="dark"] {
+  --bg: #0a0e1a;
+  --bg-grid: rgba(129, 140, 248, 0.07);
+  --surface: #121729;
+  --surface-2: #171d33;
+  --ink: #e9ecf7;
+  --ink-soft: #a3aac4;
+  --ink-faint: #6b7290;
+  --line: #262e4a;
+  --accent: #818cf8;
+  --accent-ink: #0a0e1a;
+  --accent-soft: #1c2140;
+  --accent-glow: rgba(129, 140, 248, 0.35);
+  --amber: #fbbf24;
+  --amber-soft: #2c2410;
+  --good: #34d399;
+  --good-soft: #0f2a20;
+  --shadow: 0 24px 50px -18px rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 10px 22px -14px rgba(0, 0, 0, 0.55);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background:
+    radial-gradient(circle at 1px 1px, var(--bg-grid) 1px, transparent 0) 0 0/22px 22px,
+    var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  overscroll-behavior-y: none;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+h1, h2, .display { font-family: 'Space Grotesk', sans-serif; }
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+button { font-family: inherit; cursor: pointer; }
+
+/* ---------- Header ---------- */
+header {
+  position: sticky; top: 0; z-index: 30;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.header-inner {
+  max-width: 880px; margin: 0 auto; padding: 14px 18px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark {
+  width: 38px; height: 38px; border-radius: 11px;
+  background: linear-gradient(145deg, var(--accent), #6366f1);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 19px; box-shadow: 0 8px 16px -6px var(--accent-glow);
+  flex-shrink: 0;
+}
+.brand-text h1 { font-size: 16px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+.brand-text span { font-size: 11px; color: var(--ink-faint); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+
+.icon-btn {
+  width: 38px; height: 38px; border-radius: 11px; border: 1px solid var(--line);
+  background: var(--surface-2); color: var(--ink-soft);
+  display: flex; align-items: center; justify-content: center; font-size: 17px;
+  transition: all 0.2s ease; flex-shrink: 0;
+}
+.icon-btn:hover { color: var(--accent); border-color: var(--accent); transform: translateY(-1px); }
+.icon-btn.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+.header-actions { display: flex; align-items: center; gap: 8px; }
+
+/* view segmented control */
+.segmented {
+  display: flex; background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: 12px; padding: 3px; gap: 2px;
+}
+.segmented button {
+  border: none; background: transparent; color: var(--ink-soft);
+  font-size: 12.5px; font-weight: 600; padding: 7px 13px; border-radius: 9px;
+  display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;
+}
+.segmented button.active { background: var(--accent); color: var(--accent-ink); box-shadow: var(--shadow-sm); }
+
+/* ---------- Search + filters row ---------- */
+.toolbar { max-width: 880px; margin: 0 auto; padding: 14px 18px 0; }
+.search-wrap {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  padding: 10px 14px; box-shadow: var(--shadow-sm);
+}
+.search-wrap input {
+  border: none; outline: none; background: transparent; color: var(--ink);
+  font-size: 14px; width: 100%; font-family: inherit;
+}
+.search-wrap input::placeholder { color: var(--ink-faint); }
+.search-wrap i { color: var(--ink-faint); font-size: 16px; }
+.search-clear { font-size: 15px; color: var(--ink-faint); display: none; }
+.search-clear.show { display: block; }
+
+.chip-row {
+  display: flex; gap: 8px; overflow-x: auto; padding: 12px 2px 4px;
+  scroll-snap-type: x proximity;
+}
+.chip {
+  scroll-snap-align: start; flex-shrink: 0;
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink-soft); font-size: 12.5px; font-weight: 600;
+  transition: all 0.2s ease; white-space: nowrap;
+}
+.chip i { font-size: 15px; }
+.chip .count {
+  font-family: 'JetBrains Mono', monospace; font-size: 10.5px; opacity: 0.65;
+  background: color-mix(in srgb, currentColor 14%, transparent); padding: 1px 6px; border-radius: 999px;
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); box-shadow: 0 8px 18px -10px var(--accent-glow); }
+
+/* ---------- Stats / progress row ---------- */
+.stats-row {
+  max-width: 880px; margin: 16px auto 0; padding: 0 18px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+.gauge-wrap { display: flex; align-items: center; gap: 10px; }
+.gauge { position: relative; width: 46px; height: 46px; }
+.gauge svg { transform: rotate(-90deg); }
+.gauge-track { fill: none; stroke: var(--line); stroke-width: 4; }
+.gauge-fill { fill: none; stroke: var(--good); stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; }
+.gauge-label {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: var(--good);
+}
+.stat-text { display: flex; flex-direction: column; gap: 1px; }
+.stat-text .n { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: var(--ink); }
+.stat-text .l { font-size: 10.5px; color: var(--ink-faint); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+
+.pill-btn {
+  display: flex; align-items: center; gap: 6px; padding: 8px 13px; border-radius: 11px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft);
+  font-size: 12px; font-weight: 600; transition: all 0.2s ease;
+}
+.pill-btn:hover { border-color: var(--accent); color: var(--accent); }
+.pill-btn.on { background: var(--amber-soft); color: var(--amber); border-color: color-mix(in srgb, var(--amber) 40%, transparent); }
+
+/* ---------- Study main ---------- */
+main { max-width: 880px; margin: 0 auto; padding: 20px 18px 48px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+
+.perspective { perspective: 1600px; width: 100%; max-width: 640px; }
+.card-shell { width: 100%; aspect-ratio: 4/3; }
+@media (min-width: 640px) { .card-shell { aspect-ratio: 16/9.2; } }
+
+.flip-inner {
+  position: relative; width: 100%; height: 100%;
+  transform-style: preserve-3d; cursor: pointer;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.flip-inner.flipped { transform: rotateY(180deg); }
+.face {
+  position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  border-radius: var(--radius); padding: 22px 26px; display: flex; flex-direction: column;
+  box-shadow: var(--shadow); border: 1px solid var(--line);
+}
+.face-front { background: var(--surface); }
+.face-back {
+  transform: rotateY(180deg);
+  background: linear-gradient(155deg, var(--accent), #4338ca);
+  color: #fff; border: none;
+}
+html[data-theme="dark"] .face-back { background: linear-gradient(155deg, #4338ca, #1e1b4b); }
+
+.face-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.tag {
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 5px 11px; border-radius: 8px; background: var(--accent-soft); color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+}
+.face-back .tag { background: rgba(255,255,255,0.15); color: #fff; }
+.idx-mark { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-faint); font-weight: 600; }
+.face-back .idx-mark { color: rgba(255,255,255,0.7); }
+
+.face-body { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; overflow-y: auto; padding: 14px 4px; }
+.face-body::-webkit-scrollbar { display: none; }
+.q-text { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: clamp(19px, 3.4vw, 27px); line-height: 1.32; color: var(--ink); }
+.a-text { font-weight: 500; font-size: clamp(16px, 2.6vw, 21px); line-height: 1.5; }
+
+.face-bottom { display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 12px; font-weight: 600; color: var(--ink-faint); }
+.face-back .face-bottom { color: rgba(255,255,255,0.75); }
+
+.mastered-badge {
+  position: absolute; top: -10px; right: 18px; background: var(--good); color: #fff;
+  font-size: 10.5px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+  display: none; align-items: center; gap: 4px; box-shadow: 0 6px 14px -6px rgba(15,157,99,0.5); z-index: 2;
+}
+.mastered-badge.show { display: flex; }
+
+/* mastery buttons */
+.mastery-row { display: flex; gap: 10px; width: 100%; max-width: 640px; }
+.mastery-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface);
+  font-size: 13px; font-weight: 700; transition: all 0.2s ease; box-shadow: var(--shadow-sm);
+}
+.mastery-btn.review { color: var(--amber); }
+.mastery-btn.review:hover { background: var(--amber-soft); border-color: var(--amber); }
+.mastery-btn.got-it { color: var(--good); }
+.mastery-btn.got-it:hover { background: var(--good-soft); border-color: var(--good); }
+.mastery-btn.got-it.marked { background: var(--good); color: #fff; border-color: var(--good); }
+.mastery-btn.review.marked { background: var(--amber); color: #fff; border-color: var(--amber); }
+
+/* hint */
+.hint-wrap { width: 100%; max-width: 640px; }
+.hint-btn {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px; border-radius: 13px; border: 1px dashed var(--line); background: transparent;
+  color: var(--ink-faint); font-size: 12.5px; font-weight: 600; transition: all 0.2s ease;
+}
+.hint-btn:hover { color: var(--accent); border-color: var(--accent); }
+.hint-panel {
+  margin-top: 8px; padding: 13px 16px; border-radius: 13px; background: var(--surface-2);
+  border: 1px solid var(--line); font-size: 13px; color: var(--ink-soft); text-align: center;
+  display: none;
+}
+.hint-panel.show { display: block; }
+
+/* nav */
+.nav-row { display: flex; align-items: center; gap: 20px; margin-top: 4px; }
+.nav-btn {
+  width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 22px;
+  box-shadow: var(--shadow-sm); transition: all 0.15s ease;
+}
+.nav-btn:hover { transform: translateY(-2px); border-color: var(--accent); color: var(--accent); }
+.nav-btn:active { transform: scale(0.94); }
+.nav-btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.nav-btn:disabled { opacity: 0.35; pointer-events: none; }
+.nav-hint { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; color: var(--ink-faint); font-weight: 600; }
+.nav-hint .keys { display: none; gap: 8px; align-items: center; }
+@media (min-width: 640px) { .nav-hint .keys { display: flex; } .nav-hint .swipe { display: none; } }
+kbd { background: var(--surface-2); border: 1px solid var(--line); border-radius: 5px; padding: 2px 6px; font-family: 'JetBrains Mono', monospace; font-size: 10px; }
+
+/* empty / done state */
+.empty-state {
+  width: 100%; max-width: 640px; padding: 50px 24px; text-align: center; border-radius: var(--radius);
+  border: 1px dashed var(--line); background: var(--surface-2); display: none; flex-direction: column; align-items: center; gap: 12px;
+}
+.empty-state.show { display: flex; }
+.empty-state i { font-size: 40px; color: var(--good); }
+.empty-state h3 { margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 19px; }
+.empty-state p { margin: 0; color: var(--ink-soft); font-size: 13.5px; max-width: 340px; }
+.empty-state button { margin-top: 4px; }
+
+/* ---------- Browse view ---------- */
+.browse-wrap { width: 100%; display: none; flex-direction: column; gap: 10px; }
+.browse-wrap.show { display: flex; }
+.study-wrap { display: flex; flex-direction: column; align-items: center; gap: 18px; width: 100%; }
+.study-wrap.hide { display: none; }
+
+.browse-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 640px) { .browse-grid { grid-template-columns: 1fr 1fr; } }
+.browse-card {
+  text-align: left; padding: 15px 16px; border-radius: 15px; background: var(--surface);
+  border: 1px solid var(--line); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 8px;
+  transition: all 0.18s ease; position: relative;
+}
+.browse-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.browse-card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.browse-q { font-weight: 600; font-size: 14px; line-height: 1.4; color: var(--ink); }
+.browse-a { font-size: 12.5px; color: var(--ink-faint); line-height: 1.45; }
+.browse-check { color: var(--good); font-size: 16px; flex-shrink: 0; }
+.browse-empty { text-align: center; padding: 40px 20px; color: var(--ink-faint); font-size: 13.5px; }
+
+/* ---------- shortcuts modal ---------- */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(10,12,24,0.5); backdrop-filter: blur(3px);
+  display: none; align-items: center; justify-content: center; z-index: 50; padding: 20px;
+}
+.modal-backdrop.show { display: flex; }
+.modal {
+  background: var(--surface); border-radius: 18px; padding: 24px; max-width: 380px; width: 100%;
+  border: 1px solid var(--line); box-shadow: var(--shadow);
+}
+.modal h3 { margin: 0 0 14px; font-family: 'Space Grotesk', sans-serif; font-size: 17px; display: flex; align-items: center; gap: 8px; }
+.shortcut-list { display: flex; flex-direction: column; gap: 9px; }
+.shortcut-list div { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--ink-soft); }
+.modal-close { margin-top: 18px; width: 100%; padding: 11px; border-radius: 11px; background: var(--accent); color: var(--accent-ink); border: none; font-weight: 700; font-size: 13px; }
+
+.fab {
+  position: fixed; bottom: 20px; right: 20px; width: 46px; height: 46px; border-radius: 50%;
+  background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-sm);
+  display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--ink-soft); z-index: 20;
+}
+.fab:hover { color: var(--accent); border-color: var(--accent); }
+
+@media (max-width: 480px) {
+  .header-actions .segmented span.label { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark"><i class="ph-fill ph-gauge"></i></div>
+      <div class="brand-text">
+        <h1>BUS 440</h1>
+        <span>Mastery Console</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="segmented" id="view-toggle">
+        <button data-view="study" class="active"><i class="ph-bold ph-cards"></i><span class="label">Study</span></button>
+        <button data-view="browse"><i class="ph-bold ph-squares-four"></i><span class="label">Browse</span></button>
+      </div>
+      <button class="icon-btn" id="theme-toggle" aria-label="Toggle dark mode"><i class="ph-bold ph-moon"></i></button>
+      <button class="icon-btn" id="shortcuts-btn" aria-label="Keyboard shortcuts"><i class="ph-bold ph-keyboard"></i></button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <i class="ph-bold ph-magnifying-glass"></i>
+      <input type="text" id="search-input" placeholder="Search questions or answers…" autocomplete="off">
+      <i class="ph-bold ph-x-circle search-clear" id="search-clear"></i>
+    </div>
+    <div class="chip-row no-scrollbar" id="chip-row"></div>
+  </div>
+</header>
+
+<main>
+  <div class="stats-row">
+    <div class="gauge-wrap">
+      <div class="gauge">
+        <svg width="46" height="46" viewBox="0 0 46 46">
+          <circle class="gauge-track" cx="23" cy="23" r="19"></circle>
+          <circle class="gauge-fill" id="gauge-fill" cx="23" cy="23" r="19" stroke-dasharray="119.4" stroke-dashoffset="119.4"></circle>
+        </svg>
+        <div class="gauge-label" id="gauge-label">0%</div>
+      </div>
+      <div class="stat-text">
+        <span class="n mono" id="progress-text">1 / 90</span>
+        <span class="l" id="mastered-text">0 mastered</span>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="pill-btn" id="review-toggle"><i class="ph-bold ph-funnel"></i>Review only</button>
+      <button class="pill-btn" id="shuffle-btn"><i class="ph-bold ph-shuffle"></i>Shuffle</button>
+    </div>
+  </div>
+
+  <!-- STUDY VIEW -->
+  <div class="study-wrap" id="study-wrap">
+    <div class="empty-state" id="empty-state">
+      <i class="ph-fill ph-confetti"></i>
+      <h3>All caught up!</h3>
+      <p>You've marked every card in this set as mastered. Clear the filter or pick a new category to keep going.</p>
+      <button class="pill-btn" id="empty-reset"><i class="ph-bold ph-arrow-counter-clockwise"></i>Show all cards again</button>
+    </div>
+
+    <div class="perspective" id="card-holder">
+      <div class="card-shell" style="position:relative;">
+        <div class="mastered-badge" id="mastered-badge"><i class="ph-fill ph-check-circle"></i>Mastered</div>
+        <div class="flip-inner" id="flip-inner">
+          <div class="face face-front">
+            <div class="face-top">
+              <span class="tag" id="cat-front">Category</span>
+              <span class="idx-mark" id="idx-front">01 / 90</span>
+            </div>
+            <div class="face-body"><h2 class="q-text" id="q-text">Question</h2></div>
+            <div class="face-bottom"><i class="ph-bold ph-arrows-left-right"></i>Tap to reveal answer</div>
+          </div>
+          <div class="face face-back">
+            <div class="face-top">
+              <span class="tag" id="cat-back">Category</span>
+              <i class="ph-fill ph-lightbulb" style="font-size:18px;"></i>
+            </div>
+            <div class="face-body"><p class="a-text" id="a-text">Answer</p></div>
+            <div class="face-bottom"><i class="ph-bold ph-arrows-left-right"></i>Tap to flip back</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mastery-row">
+      <button class="mastery-btn review" id="mark-review"><i class="ph-bold ph-arrow-counter-clockwise"></i>Still learning</button>
+      <button class="mastery-btn got-it" id="mark-mastered"><i class="ph-bold ph-check"></i>Got it</button>
+    </div>
+
+    <div class="hint-wrap">
+      <button class="hint-btn" id="hint-btn"><i class="ph-bold ph-info"></i><span id="hint-btn-text">Show hint</span></button>
+      <div class="hint-panel" id="hint-panel"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" id="prev-btn" aria-label="Previous"><i class="ph-bold ph-caret-left"></i></button>
+      <div class="nav-hint">
+        <div class="keys">
+          <span><kbd>←</kbd></span><span><kbd>Space</kbd></span><span><kbd>→</kbd></span>
+        </div>
+        <span class="swipe">Swipe · Tap · M to mark</span>
+      </div>
+      <button class="nav-btn primary" id="next-btn" aria-label="Next"><i class="ph-bold ph-caret-right"></i></button>
+    </div>
+  </div>
+
+  <!-- BROWSE VIEW -->
+  <div class="browse-wrap" id="browse-wrap">
+    <div class="browse-grid" id="browse-grid"></div>
+    <div class="browse-empty" id="browse-empty" style="display:none;">No cards match your search.</div>
+  </div>
+</main>
+
+<button class="fab" id="fab-top" aria-label="Back to top" style="display:none;"><i class="ph-bold ph-arrow-up"></i></button>
+
+<div class="modal-backdrop" id="shortcuts-modal">
+  <div class="modal">
+    <h3><i class="ph-bold ph-keyboard"></i>Keyboard shortcuts</h3>
+    <div class="shortcut-list">
+      <div><span>Flip card</span><kbd>Space</kbd></div>
+      <div><span>Next / Previous</span><kbd>→</kbd> <kbd>←</kbd></div>
+      <div><span>Mark as mastered</span><kbd>M</kbd></div>
+      <div><span>Still learning</span><kbd>R</kbd></div>
+      <div><span>Shuffle deck</span><kbd>S</kbd></div>
+      <div><span>Focus search</span><kbd>/</kbd></div>
+      <div><span>Toggle dark mode</span><kbd>D</kbd></div>
+      <div><span>Close dialogs</span><kbd>Esc</kbd></div>
+    </div>
+    <button class="modal-close" id="modal-close">Got it</button>
+  </div>
+</div>
+
+<script>
+const CATEGORIES = [
+    { name: "Management Fundamentals", icon: "ph-gear-six" },
+            { name: "Management Theories & Roles", icon: "ph-users-three" },
+            { name: "Total Quality Management (TQM)", icon: "ph-target" },
+            { name: "Leadership & Communication", icon: "ph-chats-circle" },
+            { name: "Project Management", icon: "ph-kanban" },
+            { name: "Inventory Management", icon: "ph-package" }
+];
+
+const rawData = [
+            // Management Fundamentals
+            { c: "Management Fundamentals", q: "What is Management? (Comprehensive Definition)", a: "Management is the process of planning, organizing, staffing, directing, coordinating, and controlling human, financial, material, and technological resources efficiently and effectively to achieve organisational goals.", h: "Think of it as a process involving POSDCORB to achieve goals efficiently." },
+            { c: "Management Fundamentals", q: "Henri Fayol's Definition of Management (1916)", a: "Management is the process of forecasting, planning, organising, commanding, coordinating, and controlling.", h: "Emphasises management as a continuous process." },
+            { c: "Management Fundamentals", q: "Mary Parker Follett's Definition of Management (1941)", a: "Management is the art of getting things done through people.", h: "Highlights human relations." },
+            { c: "Management Fundamentals", q: "List 5 Characteristics of Management", a: "1. Goal-oriented\n2. Universal\n3. Continuous\n4. Dynamic\n5. Decision-making\n(Also: People-centered, Multidisciplinary, Resource-oriented, Science and art, Results-oriented)", h: "Is it static or dynamic? Is it just for one type of organization?" },
+            { c: "Management Fundamentals", q: "Why is Management important in Engineering?", a: "It enables engineers to complete projects within schedule, control costs, improve quality, coordinate technical teams, enhance productivity, reduce waste, improve innovation, ensure safety compliance, and achieve customer satisfaction.", h: "Technical skills alone aren't enough for project success." },
+            { c: "Management Fundamentals", q: "What are the 5 core functions of management?", a: "1. Planning\n2. Organizing\n3. Staffing\n4. Directing (Leading)\n5. Controlling", h: "POSDC (without the ORB)" },
+            { c: "Management Fundamentals", q: "Define the 'Planning' function.", a: "Deciding in advance what to do, how to do it, when to do it, and who should do it.", h: "Looking ahead and setting objectives." },
+            { c: "Management Fundamentals", q: "Define the 'Organizing' function.", a: "Arranging resources and assigning responsibilities to achieve organizational objectives (e.g., designing structures, delegating authority).", h: "Putting things and people in their proper place." },
+            { c: "Management Fundamentals", q: "Define the 'Controlling' function.", a: "The process of measuring actual performance against planned objectives and taking corrective action where necessary.", h: "Monitoring and correcting." },
+            { c: "Management Fundamentals", q: "What are the three forms/types of organization structures discussed?", a: "1. Line Organisation\n2. Functional Organisation\n3. Line and Staff Organisation", h: "Scalar, specialized, and a mix of 'doers' and 'thinkers'." },
+            { c: "Management Fundamentals", q: "Describe a Line Organisation.", a: "Direct lines of authority flow from top to bottom, and responsibility flows from bottom to top. It's characterized by a superior-subordinate relationship (military type).", h: "Straight chain of command." },
+            { c: "Management Fundamentals", q: "What is the key feature of a Functional Organisation?", a: "The organization is based on various functions or specializations. A worker might receive orders from multiple specialized supervisors.", h: "Divides work by department (e.g., sales, finance, production)." },
+            { c: "Management Fundamentals", q: "What is a Line and Staff Organisation?", a: "Line officers ('doers') execute plans, while staff officers ('thinkers' or specialists) provide advice and recommendations to the line managers.", h: "Combines direct authority with expert advisory support." },
+            { c: "Management Fundamentals", q: "What is an Informal Organization?", a: "A grouping of people emerging unofficially and without being designated as parts of the formal organization (e.g., cliques or sub-groups satisfying human needs).", h: "Unofficial networks, the 'grapevine'." },
+            { c: "Management Fundamentals", q: "Why should management NOT ignore the informal organization?", a: "It brings cohesiveness, fills gaps in the formal structure, provides a useful communication channel, and can improve worker morale and productivity.", h: "It fulfills social needs that the formal structure cannot." },
+            { c: "Management Fundamentals", q: "Distinguish between Management and Administration regarding policy.", a: "Administration *formulates* policies and determines objectives (top level, strategic), while Management *implements* those policies and executes plans (middle/lower levels, operational).", h: "Who decides 'what' vs. who figures out 'how'?" },
+            { c: "Management Fundamentals", q: "Why is management considered an Art?", a: "It involves the practical application of knowledge, personal skills (leadership, communication), creativity, experience, and judgment to achieve results.", h: "Requires creativity, intuition, and dealing with people." },
+            { c: "Management Fundamentals", q: "Why is management considered a Science?", a: "It is based on a systematic body of knowledge, universal principles, cause-and-effect relationships, observation, experimentation, and predictability.", h: "Relies on established theories, data, and analytical methods." },
+            { c: "Management Fundamentals", q: "Why is Management both an Art and a Science?", a: "Science provides the theoretical knowledge, principles, and analytical tools, while Art provides the practical skills and creativity to apply that knowledge effectively in real-world situations.", h: "Theory + Practical Application." },
+            { c: "Management Fundamentals", q: "Give an example of the 'Art' and 'Science' of Engineering Management.", a: "Science: Using CPM/PERT, cost analysis, or simulation models.\nArt: Motivating teams, resolving conflicts, and negotiating with stakeholders.", h: "Math/Tools vs. People/Leadership." },
+
+            // Management Theories & Roles
+            { c: "Management Theories & Roles", q: "What are the three major periods of Management Theories?", a: "1. Classical Management Theories (1880–1930)\n2. Neo-Classical (Behavioural) Management Theories (1930–1950)\n3. Modern Management Theories (1950–Present)", h: "From industrial efficiency, to human focus, to complex systems." },
+            { c: "Management Theories & Roles", q: "Who is the Father of Scientific Management?", a: "Frederick Winslow Taylor (1856–1915)", h: "Replaced 'rule of thumb' with science." },
+            { c: "Management Theories & Roles", q: "What were the main principles of Taylor's Scientific Management?", a: "Science instead of rule of thumb, scientific selection/training of workers, cooperation between management and workers, and equal division of work.", h: "Focus on time/motion studies and efficiency." },
+            { c: "Management Theories & Roles", q: "Who is the Father of Administrative Management?", a: "Henri Fayol (1841–1925)", h: "Developed 14 principles of management." },
+            { c: "Management Theories & Roles", q: "Name 5 of Fayol's 14 Principles of Management.", a: "Examples: Division of work, Authority and responsibility, Unity of command, Unity of direction, Scalar chain, Equity, Esprit de corps.", h: "Rules for administrative efficiency and organizational structure." },
+            { c: "Management Theories & Roles", q: "Who proposed the Bureaucratic Management Theory?", a: "Max Weber", h: "Focus on rational rules, formal hierarchy, and impersonal relationships." },
+            { c: "Management Theories & Roles", q: "What is the Human Relations Theory, and who is its main proponent?", a: "Proponent: Elton Mayo (Hawthorne Studies). It argued that employee motivation, communication, and informal social groups strongly influence productivity, not just physical conditions.", h: "The Hawthorne Experiments." },
+            { c: "Management Theories & Roles", q: "What is Systems Theory in modern management?", a: "Views organizations as systems made up of interrelated and interdependent parts (inputs, transformation, outputs, feedback) working together to achieve goals.", h: "Holistic view; a change in one part affects the whole." },
+            { c: "Management Theories & Roles", q: "What is Contingency Theory?", a: "The idea that there is 'no one best way' to manage. Decisions depend on situational factors like organizational size, technology, and environment.", h: "Management style depends on the situation." },
+            { c: "Management Theories & Roles", q: "What are the three categories of Managerial Roles identified by Henry Mintzberg?", a: "1. Interpersonal Roles\n2. Informational Roles\n3. Decision Making Roles", h: "People, Data, and Choices." },
+            { c: "Management Theories & Roles", q: "What specific roles fall under Mintzberg's 'Interpersonal Role'?", a: "Figurehead, Leader, and Liaison officer.", h: "Roles involving relationships with subordinates and outsiders." },
+            { c: "Management Theories & Roles", q: "What specific roles fall under Mintzberg's 'Informational Role'?", a: "Monitor, Disseminator, and Spokesman.", h: "Collecting, receiving, and sharing information." },
+            { c: "Management Theories & Roles", q: "What specific roles fall under Mintzberg's 'Decision Making Role'?", a: "Entrepreneur, Disturbance handler, Resource allocator, and Negotiator.", h: "Choosing between alternatives and solving problems." },
+            { c: "Management Theories & Roles", q: "What are the three basic types of managerial skills identified by Robert L. Katz?", a: "1. Technical Skills\n2. Human Relation Skills\n3. Conceptual Skills", h: "Tools/processes, people, and big-picture thinking." },
+            { c: "Management Theories & Roles", q: "How does the importance of managerial skills change across management levels?", a: "Technical skills are most important at lower levels. Conceptual skills are most important at top levels. Human skills are equally important at all levels.", h: "Frontline needs mechanics; Executives need vision; Everyone needs people." },
+
+            // Total Quality Management (TQM)
+            { c: "Total Quality Management (TQM)", q: "Define Total Quality Management (TQM)", a: "A management philosophy emphasizing continuous improvement in all aspects of an organization’s operations, with the ultimate goal of achieving customer satisfaction. 'Do the right things, right the first time, every time.'", h: "Continuous improvement focused on the customer." },
+            { c: "Total Quality Management (TQM)", q: "List 5 Core Principles of TQM", a: "1. Customer Focus\n2. Continuous Improvement (Kaizen)\n3. Employee Involvement\n4. Process Approach\n5. Fact-based Decision Making\n(Also: Leadership Commitment, Strategic Approach)", h: "Who is the focus? How often do you improve? Who is involved?" },
+            { c: "Total Quality Management (TQM)", q: "What is Kaizen in the context of TQM?", a: "Kaizen means 'Continuous Improvement.' It involves ongoing efforts, incremental changes, and innovation to enhance products, processes, and services.", h: "A Japanese term for continuous, incremental change." },
+            { c: "Total Quality Management (TQM)", q: "What is the difference between Process Quality and Product Quality in TQM?", a: "Process Quality focuses on optimizing the workflows and methods (efficiency, reducing waste) to create the outcome. Product Quality focuses on ensuring the final good/service meets or exceeds customer expectations (reliability, zero defects).", h: "How it's made vs. what is made." },
+            { c: "Total Quality Management (TQM)", q: "Name 4 common TQM Tools", a: "1. Pareto Charts (80/20 rule)\n2. Fishbone Diagrams (Root cause analysis)\n3. Control Charts (Process variation)\n4. Flow Charts (Process steps)\n(Also: Check Sheets, Scatter Diagrams, Histograms)", h: "Visual methods for analyzing data and problems." },
+            { c: "Total Quality Management (TQM)", q: "What is the Pareto Principle (80/20 rule) in TQM?", a: "A principle stating that 80% of outcomes (or problems/defects) result from 20% of causes. It helps prioritize the most significant factors contributing to quality issues.", h: "Focusing on the 'vital few' causes." },
+            { c: "Total Quality Management (TQM)", q: "What is a Fishbone Diagram used for?", a: "Also known as a Cause-and-Effect diagram, it helps teams analyze a problem's root causes by identifying potential causes and their relationships, focusing on the root rather than symptoms.", h: "Looks like a skeleton; used for root cause analysis." },
+            { c: "Total Quality Management (TQM)", q: "What is Six Sigma?", a: "A data-driven methodology focused on reducing defects and variations to achieve near-perfect quality (3.4 defects per million). It uses the DMAIC structured approach.", h: "Motorola/GE concept aiming for 3.4 defects per million." },
+            { c: "Total Quality Management (TQM)", q: "What does DMAIC stand for in Six Sigma?", a: "Define, Measure, Analyze, Improve, Control.", h: "The 5 steps of the Six Sigma improvement cycle." },
+            { c: "Total Quality Management (TQM)", q: "What is the Lean Principle in TQM?", a: "An approach focused on the identification and elimination of waste ('muda') to enhance efficiency and optimize processes, delivering higher value to customers.", h: "Cutting the 'fat' (waste) from processes." },
+            { c: "Total Quality Management (TQM)", q: "What is Benchmarking in TQM?", a: "A strategic tool used to improve processes/products by comparing performance metrics with those of industry leaders, competitors, or recognized best practices.", h: "Comparing yourself to the best in the industry." },
+            { c: "Total Quality Management (TQM)", q: "What is the ISO 9000 series?", a: "International standards for quality management systems that focus on process consistency, documentation, and customer satisfaction.", h: "International quality certification." },
+            { c: "Total Quality Management (TQM)", q: "What is the difference between Quality Assurance (QA) and Quality Control (QC)?", a: "QA is proactive, focusing on designing systems and processes to *prevent* defects before they occur. QC is reactive, involving the inspection and testing of products to *detect* and correct defects after they occur.", h: "Preventing errors (Process) vs. Detecting errors (Product)." },
+            { c: "Total Quality Management (TQM)", q: "What is the PDSA cycle in Continuous Quality Improvement?", a: "Plan-Do-Study-Act: A framework for planning a change, implementing it on a small scale, studying the results, and acting on learnings to make further improvements.", h: "A 4-step iterative cycle for improvement." },
+            { c: "Total Quality Management (TQM)", q: "Name 3 common obstacles to implementing TQM.", a: "1. Resistance to change\n2. Lack of top management commitment\n3. Insufficient training/resources\n(Also: short-term focus, inadequate communication, silos)", h: "Why do quality programs fail?" },
+
+            // Leadership & Communication
+            { c: "Leadership & Communication", q: "Differentiate between Leadership and Management.", a: "Leadership focuses on setting direction, influencing, inspiring, and driving change. Management focuses on planning, organizing, budgeting, and controlling processes.", h: "Inspiring vs. Controlling." },
+            { c: "Leadership & Communication", q: "What are 5 essential leadership qualities?", a: "1. Integrity & Accountability\n2. Effective Communication\n3. Vision & Purpose\n4. Empathy & Emotional Intelligence\n5. Adaptability & Resilience", h: "Traits that build trust and guide a team." },
+            { c: "Leadership & Communication", q: "What are the 4 key pillars of Trust in Leadership?", a: "1. Integrity (honesty)\n2. Competence (skills/ability)\n3. Consistency (reliability)\n4. Connection/Empathy (care for employees)", h: "Honesty, Ability, Reliability, Care." },
+            { c: "Leadership & Communication", q: "What is the impact of trust in an organization?", a: "Increased performance/innovation, higher employee loyalty and retention, and reduced risk (teams support each other and adapt to change).", h: "How does trust affect results and turnover?" },
+            { c: "Leadership & Communication", q: "What are the 7Cs of effective communication?", a: "1. Clarity\n2. Conciseness\n3. Correctness\n4. Completeness\n5. Courtesy\n6. Concreteness\n7. Consideration", h: "Seven principles starting with 'C' for good messages." },
+            { c: "Leadership & Communication", q: "What are the three rules for achieving Clarity in communication?", a: "1. Be clear in your own mind about what you want to communicate.\n2. Deliver the message succinctly.\n3. Ensure the message has been clearly and correctly understood.", h: "Know it, say it simply, check understanding." },
+            { c: "Leadership & Communication", q: "What are the 4 types of communication described?", a: "1. Written Words (memos, reports)\n2. Spoken Words (meetings, calls)\n3. Symbolic Gestures (facial expressions, posture, silence)\n4. Visual Images/Multimedia (charts, videos)", h: "Text, voice, body language, pictures." },
+            { c: "Leadership & Communication", q: "What are the rules for giving negative feedback?", a: "Show understanding of what went wrong, draw out ways to improve, use questions rather than assertions, express opinions honestly but positively, and be objective (avoid being emotional/personal).", h: "Focus on improvement and objectivity, not personal attacks." },
+            { c: "Leadership & Communication", q: "What is Knowledge Management (KM) in an organization?", a: "Systematically identifying, capturing, organizing, storing, and sharing internal expertise (e.g., lessons learned, databases) to improve decision-making and efficiency.", h: "Managing the 'brain' of the company." },
+
+            // Project Management
+            { c: "Project Management", q: "Define a Project.", a: "An undertaking that involves a sequence of tasks that must be completed at a specific period of time to attain a certain outcome (e.g., constructing a road, developing software).", h: "A temporary endeavor to create a unique result." },
+            { c: "Project Management", q: "List 5 characteristics of a project.", a: "1. Definite beginning and end (time-consuming)\n2. Clearly defined goals (SMART)\n3. Involves related activities\n4. Unique/non-repetitive tasks\n5. Involves resources/budget/manpower\n(Also: involves risk/uncertainty)", h: "Temporary, unique, resource-constrained." },
+            { c: "Project Management", q: "What are the 3 classifications of projects?", a: "1. Compliance/Emergency ('must-do' to meet regulations or fix disasters).\n2. Operational (support current operations, improve efficiency, e.g., TQM).\n3. Strategic (support long-run mission, increase revenue/market share).", h: "Must-do, efficiency-boosting, or long-term growth." },
+            { c: "Project Management", q: "What are the 5 phases of the Project Life Cycle?", a: "1. Initiation\n2. Planning\n3. Execution\n4. Monitoring and Control\n5. Close-out (Closure)", h: "Start, plan, do, check, finish." },
+            { c: "Project Management", q: "What is a Work Breakdown Structure (WBS) used for?", a: "Used during project planning, it details the work, tasks, resources, and budget needed. (Note: WBS may not contain specific timelines, unlike a Gantt chart).", h: "Breaking down the project into smaller tasks." },
+            { c: "Project Management", q: "What is Project Scheduling?", a: "The preparation of a timetable for implementing activities and computing resources required at different stages. It includes identifying critical tasks and developing network diagrams/Gantt charts.", h: "Setting the timeline and task order." },
+            { c: "Project Management", q: "What is the Project Scope?", a: "It defines the boundaries of a project, specifying all work that must be done to satisfy the customer, including goals, deliverables, costs, and deadlines.", h: "The boundaries and required work of the project." },
+            { c: "Project Management", q: "What are Project Deliverables?", a: "Tangible or intangible products or items provided/delivered at a specified time during a project or at the end of the project.", h: "The final outputs handed over to the client." },
+            { c: "Project Management", q: "What are the two Traditional Methods of Project Evaluation?", a: "1. Payback Period (PBP)\n2. Accounting Rate of Return (ARR)", h: "Simple methods: Time to recover cost, and average profit ratio." },
+            { c: "Project Management", q: "What are the two Scientific Methods of Project Evaluation?", a: "1. Net Present Value (NPV)\n2. Internal Rate of Return (IRR)\n(Also Profitability Index)", h: "Methods that account for the time value of money." },
+            { c: "Project Management", q: "What is the Payback Period (PBP) and its formula?", a: "Measures the time it will take to recover the initial investment. \nFormula: PBP = Initial Investment / Annual Cash Flow.\nShorter paybacks are desirable.", h: "How long until I get my money back?" },
+            { c: "Project Management", q: "What is the major limitation of the Payback Period method?", a: "It ignores the time value of money and profitability beyond the payback point.", h: "It treats a dollar today the same as a dollar in 5 years." },
+            { c: "Project Management", q: "What is Net Present Value (NPV) and its decision rule?", a: "Determines financial viability by discounting future cash flows to present value. \nDecision Rule: If NPV > 0, Accept. If NPV < 0, Reject. (For mutually exclusive projects, accept the highest positive NPV).", h: "Present value of inflows minus initial investment." },
+            { c: "Project Management", q: "What is the Internal Rate of Return (IRR)?", a: "The discount rate at which the total present value of returns equals the present value of the investment (i.e., the rate where NPV = 0). Accept if IRR > cost of capital.", h: "The break-even discount rate." },
+            { c: "Project Management", q: "What is Project Control?", a: "The process of comparing actual project performance against the planned baseline (schedule/budget) to identify deviations and take corrective actions if necessary.", h: "Monitoring progress and fixing deviations." },
+            { c: "Project Management", q: "What is Earned Value (EV) in project control?", a: "The budgeted cost of the work actually performed. It is used to provide a realistic estimate of performance against a time-phased budget.", h: "Value of work done based on the original budget." },
+
+            // Inventory Management
+            { c: "Inventory Management", q: "Define Inventory", a: "Any kind of resource (physical, human, or financial) that has economic value and is maintained or stocked to fulfill the present and future needs of an organization.", h: "Stock held for future use." },
+            { c: "Inventory Management", q: "What are the 3 broad categories of resources in inventory?", a: "1. Physical resources (raw materials, finished goods)\n2. Human resources (unused labor/manpower)\n3. Financial resources (working capital)", h: "Materials, People, Money." },
+            { c: "Inventory Management", q: "List 4 reasons for carrying inventory (Functions of Inventory).", a: "1. To meet anticipated customer demand.\n2. To decouple successive operations (buffer against breakdowns).\n3. To protect against stockouts/shortages.\n4. To take advantage of quantity discounts or economic lot sizes.\n(Also: hedge against price increases, smooth seasonal production).", h: "Why not just order exactly what you need every single day?" },
+            { c: "Inventory Management", q: "What are the 4 main types of inventory costs?", a: "1. Purchase Cost\n2. Carrying (Holding) Cost\n3. Ordering (Set-up) Cost\n4. Shortage (Stockout) Cost", h: "Costs to buy, hold, process the order, and run out." },
+            { c: "Inventory Management", q: "What is Carrying (Holding) Cost?", a: "The cost incurred for physically keeping items in storage (e.g., warehouse rent, insurance, depreciation, obsolescence, spoilage, opportunity cost of tied-up capital).", h: "The cost of having things sit on a shelf." },
+            { c: "Inventory Management", q: "What is Ordering (Set-up) Cost?", a: "Costs that vary with the actual placement of an order, regardless of order size (e.g., preparing invoices, transportation, inspection). For in-house production, it's the machine set-up cost.", h: "The fixed administrative/logistics cost of placing a purchase." },
+            { c: "Inventory Management", q: "What is the relationship between order size, carrying cost, and ordering cost?", a: "As order size (Q) increases, average inventory increases, so Carrying Costs increase linearly. However, fewer orders are needed per year, so Ordering Costs decrease inversely.", h: "Big orders mean high storage costs but low paperwork costs." },
+            { c: "Inventory Management", q: "What is the Economic Order Quantity (EOQ)?", a: "The optimal replenishment order size that minimizes the total annual variable inventory cost (the sum of holding and ordering costs).", h: "The 'magic number' that balances holding and ordering costs." },
+            { c: "Inventory Management", q: "What is the formula for the basic EOQ model?", a: "Q* = √(2DS / H) \nWhere D = Annual Demand, S = Ordering Cost per order, H = Holding Cost per unit per year.", h: "Square root of (2 * Demand * Ordering Cost) / Holding Cost." },
+            { c: "Inventory Management", q: "What are 4 key assumptions of the basic EOQ model?", a: "1. Demand is known and constant.\n2. Lead time is zero or constant (instantaneous replenishment).\n3. No shortages/backorders allowed.\n4. Ordering cost and unit price are fixed (no quantity discounts).", h: "It assumes a 'perfect' deterministic world." },
+            { c: "Inventory Management", q: "What is Lead Time?", a: "The time interval (delay) between placing an order and receiving the delivery.", h: "How long you wait for the supplier." },
+            { c: "Inventory Management", q: "Describe the Fixed-Order Quantity System (Continuous Review / Q-system).", a: "Inventory level is monitored continuously. When it drops to a specific Reorder Point (ROP), a fixed quantity (Q) is ordered. Time between orders varies, but order size is constant.", h: "Order the same amount every time the bin gets low." },
+            { c: "Inventory Management", q: "Describe the Fixed-Order Interval System (Periodic Review / P-system).", a: "Inventory is reviewed at fixed, specific time intervals (e.g., weekly). An order is placed to bring stock up to a target level. Order sizes (Q) vary, but time between orders (T) is constant.", h: "Check the warehouse every Friday and order what's missing." },
+            { c: "Inventory Management", q: "What is the A-B-C approach to inventory classification?", a: "Classifying items by importance (usually annual dollar value) to allocate control efforts. \nA items: Very high value, tight control.\nB items: Moderate value, normal control.\nC items: Low value (but numerous), loose control.", h: "Prioritizing the 'significant few' over the 'insignificant many'." },
+            { c: "Inventory Management", q: "What is Cycle Counting?", a: "A physical count of items in inventory conducted frequently throughout the year (often based on ABC classes) to verify records and reduce discrepancies, rather than just one annual count.", h: "Auditing stock levels regularly." }];
+
+/* ---------- state ---------- */
+let activeCategory = "All";
+let searchQuery = "";
+let reviewOnly = false;
+let currentIndex = 0;
+let isFlipped = false;
+let viewMode = "study";
+let mastered = new Set();
+
+const STORAGE_KEY = "bus440-mastered-v1";
+const THEME_KEY = "bus440-theme-v1";
+
+/* ---------- persistence (best-effort) ---------- */
+async function loadState() {
+  try {
+    const r = localStorage.getItem(STORAGE_KEY);
+    if (r) mastered = new Set(JSON.parse(r));
+  } catch (e) { /* first run or unavailable */ }
+  try {
+    const t = localStorage.getItem(THEME_KEY);
+    if (t === "dark") setTheme(true);
+  } catch (e) { /* default light */ }
+}
+async function saveMastered() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...mastered])); } catch (e) {}
+}
+async function saveTheme(dark) {
+  try { localStorage.setItem(THEME_KEY, dark ? "dark" : "light"); } catch (e) {}
+}
+
+/* ---------- elements ---------- */
+const el = (id) => document.getElementById(id);
+const searchInput = el('search-input');
+const searchClear = el('search-clear');
+const chipRow = el('chip-row');
+const flipInner = el('flip-inner');
+const cardHolder = el('card-holder');
+const catFront = el('cat-front');
+const catBack = el('cat-back');
+const idxFront = el('idx-front');
+const qText = el('q-text');
+const aText = el('a-text');
+const progressText = el('progress-text');
+const masteredText = el('mastered-text');
+const gaugeFill = el('gauge-fill');
+const gaugeLabel = el('gauge-label');
+const prevBtn = el('prev-btn');
+const nextBtn = el('next-btn');
+const shuffleBtn = el('shuffle-btn');
+const reviewToggle = el('review-toggle');
+const hintBtn = el('hint-btn');
+const hintBtnText = el('hint-btn-text');
+const hintPanel = el('hint-panel');
+const markMasteredBtn = el('mark-mastered');
+const markReviewBtn = el('mark-review');
+const masteredBadge = el('mastered-badge');
+const emptyState = el('empty-state');
+const emptyReset = el('empty-reset');
+const studyWrap = el('study-wrap');
+const browseWrap = el('browse-wrap');
+const browseGrid = el('browse-grid');
+const browseEmpty = el('browse-empty');
+const viewToggle = el('view-toggle');
+const themeToggle = el('theme-toggle');
+const shortcutsBtn = el('shortcuts-btn');
+const shortcutsModal = el('shortcuts-modal');
+const modalClose = el('modal-close');
+
+/* attach stable ids */
+rawData.forEach((card, i) => card._id = i);
+
+function buildChips() {
+  const counts = {};
+  rawData.forEach(c => counts[c.c] = (counts[c.c] || 0) + 1);
+  const allChip = `<button class="chip active" data-cat="All"><i class="ph-bold ph-squares-four"></i>All<span class="count">${rawData.length}</span></button>`;
+  const chips = CATEGORIES.map(cat => `
+    <button class="chip" data-cat="${cat.name}">
+      <i class="ph-bold ${cat.icon}"></i>${cat.name}<span class="count">${counts[cat.name] || 0}</span>
+    </button>`).join('');
+  chipRow.innerHTML = allChip + chips;
+  chipRow.querySelectorAll('.chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeCategory = btn.dataset.cat;
+      chipRow.querySelectorAll('.chip').forEach(b => b.classList.toggle('active', b === btn));
+      currentIndex = 0;
+      isFlipped = false;
+      render();
+    });
+  });
+}
+
+function getActiveCards() {
+  const q = searchQuery.trim().toLowerCase();
+  return rawData.filter(card => {
+    if (activeCategory !== "All" && card.c !== activeCategory) return false;
+    if (reviewOnly && mastered.has(card._id)) return false;
+    if (q && !(card.q.toLowerCase().includes(q) || card.a.toLowerCase().includes(q))) return false;
+    return true;
+  });
+}
+
+function updateGauge() {
+  const total = rawData.filter(c => activeCategory === "All" || c.c === activeCategory).length;
+  const done = rawData.filter(c => (activeCategory === "All" || c.c === activeCategory) && mastered.has(c._id)).length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  const circumference = 119.4;
+  gaugeFill.style.strokeDashoffset = circumference - (circumference * pct / 100);
+  gaugeLabel.textContent = pct + '%';
+  masteredText.textContent = `${done} of ${total} mastered`;
+}
+
+function render() {
+  const cards = getActiveCards();
+  updateGauge();
+
+  if (viewMode === 'browse') {
+    renderBrowse(cards);
+    return;
+  }
+
+  if (cards.length === 0) {
+    cardHolder.style.display = 'none';
+    document.querySelector('.mastery-row').style.display = 'none';
+    document.querySelector('.hint-wrap').style.display = 'none';
+    document.querySelector('.nav-row').style.display = 'none';
+    emptyState.classList.add('show');
+    progressText.textContent = '0 / 0';
+    return;
+  }
+  cardHolder.style.display = 'block';
+  document.querySelector('.mastery-row').style.display = 'flex';
+  document.querySelector('.hint-wrap').style.display = 'block';
+  document.querySelector('.nav-row').style.display = 'flex';
+  emptyState.classList.remove('show');
+
+  if (currentIndex >= cards.length) currentIndex = cards.length - 1;
+  if (currentIndex < 0) currentIndex = 0;
+
+  const card = cards[currentIndex];
+  updateCardContent(card);
+  progressText.textContent = `${currentIndex + 1} / ${cards.length}`;
+  idxFront.textContent = `${String(currentIndex + 1).padStart(2,'0')} / ${cards.length}`;
+  prevBtn.disabled = currentIndex === 0;
+  nextBtn.disabled = currentIndex === cards.length - 1;
+}
+
+function updateCardContent(card) {
+  catFront.textContent = card.c;
+  catBack.textContent = card.c;
+  qText.innerHTML = card.q.replace(/\n/g, '<br>');
+  aText.innerHTML = card.a.replace(/\n/g, '<br>');
+  hintPanel.textContent = card.h || 'No hint available for this card.';
+  hintPanel.classList.remove('show');
+  hintBtnText.textContent = 'Show hint';
+  hintBtn.disabled = !card.h;
+  hintBtn.style.opacity = card.h ? '1' : '0.5';
+
+  const isMastered = mastered.has(card._id);
+  masteredBadge.classList.toggle('show', isMastered);
+  markMasteredBtn.classList.toggle('marked', isMastered);
+  markReviewBtn.classList.toggle('marked', false);
+}
+
+function renderBrowse(cards) {
+  if (cards.length === 0) {
+    browseGrid.innerHTML = '';
+    browseEmpty.style.display = 'block';
+    return;
+  }
+  browseEmpty.style.display = 'none';
+  browseGrid.innerHTML = cards.map((card) => {
+    const isMastered = mastered.has(card._id);
+    return `<button class="browse-card" data-id="${card._id}">
+      <div class="browse-card-top">
+        <span class="tag" style="font-size:9.5px;">${card.c}</span>
+        ${isMastered ? '<i class="ph-fill ph-check-circle browse-check"></i>' : ''}
+      </div>
+      <div class="browse-q">${card.q}</div>
+      <div class="browse-a">${card.a.slice(0, 110)}${card.a.length > 110 ? '…' : ''}</div>
+    </button>`;
+  }).join('');
+  browseGrid.querySelectorAll('.browse-card').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = parseInt(btn.dataset.id);
+      const cards2 = getActiveCards();
+      const idx = cards2.findIndex(c => c._id === id);
+      currentIndex = idx >= 0 ? idx : 0;
+      isFlipped = false;
+      setView('study');
+    });
+  });
+}
+
+function setView(mode) {
+  viewMode = mode;
+  viewToggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.view === mode));
+  studyWrap.classList.toggle('hide', mode !== 'study');
+  browseWrap.classList.toggle('show', mode === 'browse');
+  render();
+}
+
+function toggleFlip() {
+  const cards = getActiveCards();
+  if (cards.length === 0) return;
+  isFlipped = !isFlipped;
+  flipInner.classList.toggle('flipped', isFlipped);
+}
+
+function goToNext() {
+  const cards = getActiveCards();
+  if (currentIndex < cards.length - 1) {
+    currentIndex++;
+    isFlipped = false;
+    flipInner.classList.remove('flipped');
+    setTimeout(() => render(), isFlipped ? 0 : 0);
+    render();
+  }
+}
+function goToPrev() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    isFlipped = false;
+    flipInner.classList.remove('flipped');
+    render();
+  }
+}
+
+function markCard(state) {
+  const cards = getActiveCards();
+  if (cards.length === 0) return;
+  const card = cards[currentIndex];
+  if (state === 'mastered') {
+    mastered.add(card._id);
+  } else {
+    mastered.delete(card._id);
+  }
+  saveMastered();
+  render();
+  if (reviewOnly) {
+    setTimeout(() => {
+      const remaining = getActiveCards();
+      if (remaining.length > 0 && currentIndex >= remaining.length) currentIndex = remaining.length - 1;
+    }, 50);
+  }
+}
+
+function setTheme(dark) {
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  themeToggle.innerHTML = dark ? '<i class="ph-fill ph-sun"></i>' : '<i class="ph-bold ph-moon"></i>';
+  saveTheme(dark);
+}
+
+/* ---------- events ---------- */
+flipInner.addEventListener('click', toggleFlip);
+cardHolder.addEventListener('keydown', e => { if (e.key === 'Enter') toggleFlip(); });
+nextBtn.addEventListener('click', goToNext);
+prevBtn.addEventListener('click', goToPrev);
+
+shuffleBtn.addEventListener('click', () => {
+  for (let i = rawData.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [rawData[i], rawData[j]] = [rawData[j], rawData[i]];
+  }
+  currentIndex = 0;
+  isFlipped = false;
+  render();
+});
+
+reviewToggle.addEventListener('click', () => {
+  reviewOnly = !reviewOnly;
+  reviewToggle.classList.toggle('on', reviewOnly);
+  currentIndex = 0;
+  isFlipped = false;
+  render();
+});
+
+hintBtn.addEventListener('click', () => {
+  const showing = hintPanel.classList.toggle('show');
+  hintBtnText.textContent = showing ? 'Hide hint' : 'Show hint';
+});
+
+markMasteredBtn.addEventListener('click', () => markCard('mastered'));
+markReviewBtn.addEventListener('click', () => markCard('review'));
+emptyReset.addEventListener('click', () => {
+  reviewOnly = false;
+  reviewToggle.classList.remove('on');
+  searchQuery = '';
+  searchInput.value = '';
+  searchClear.classList.remove('show');
+  activeCategory = 'All';
+  chipRow.querySelectorAll('.chip').forEach(b => b.classList.toggle('active', b.dataset.cat === 'All'));
+  currentIndex = 0;
+  render();
+});
+
+viewToggle.querySelectorAll('button').forEach(btn => {
+  btn.addEventListener('click', () => setView(btn.dataset.view));
+});
+
+themeToggle.addEventListener('click', () => {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  setTheme(!isDark);
+});
+
+shortcutsBtn.addEventListener('click', () => shortcutsModal.classList.add('show'));
+modalClose.addEventListener('click', () => shortcutsModal.classList.remove('show'));
+shortcutsModal.addEventListener('click', e => { if (e.target === shortcutsModal) shortcutsModal.classList.remove('show'); });
+
+searchInput.addEventListener('input', e => {
+  searchQuery = e.target.value;
+  searchClear.classList.toggle('show', searchQuery.length > 0);
+  currentIndex = 0;
+  isFlipped = false;
+  render();
+});
+searchClear.addEventListener('click', () => {
+  searchQuery = '';
+  searchInput.value = '';
+  searchClear.classList.remove('show');
+  render();
+});
+
+window.addEventListener('keydown', e => {
+  if (document.activeElement === searchInput) {
+    if (e.key === 'Escape') searchInput.blur();
+    return;
+  }
+  if (shortcutsModal.classList.contains('show')) {
+    if (e.key === 'Escape') shortcutsModal.classList.remove('show');
+    return;
+  }
+  if (e.key === '/') { e.preventDefault(); searchInput.focus(); return; }
+  if (viewMode !== 'study') return;
+  if (e.key === 'ArrowRight') goToNext();
+  if (e.key === 'ArrowLeft') goToPrev();
+  if (e.key === ' ') { e.preventDefault(); toggleFlip(); }
+  if (e.key === 'm' || e.key === 'M') markCard('mastered');
+  if (e.key === 'r' || e.key === 'R') markCard('review');
+  if (e.key === 's' || e.key === 'S') shuffleBtn.click();
+  if (e.key === 'd' || e.key === 'D') themeToggle.click();
+});
+
+/* swipe */
+let touchStartX = 0, touchEndX = 0;
+cardHolder.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive:true});
+cardHolder.addEventListener('touchend', e => {
+  touchEndX = e.changedTouches[0].screenX;
+  const d = touchEndX - touchStartX;
+  if (d < -50) goToNext();
+  if (d > 50) goToPrev();
+}, {passive:true});
+
+/* fab scroll-to-top */
+const fabTop = el('fab-top');
+window.addEventListener('scroll', () => {
+  fabTop.style.display = window.scrollY > 400 ? 'flex' : 'none';
+});
+fabTop.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+
+/* ---------- init ---------- */
+(async function init() {
+  buildChips();
+  await loadState();
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Upper Lower Workout Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#0F0F0F;color:#EBEBEB;max-width:480px;margin:0 auto;min-height:100vh;overflow-x:hidden}
+.page{display:none;animation:fadeUp .2s ease both}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.page-inner{padding-bottom:72px}
+.day-header{position:sticky;top:0;z-index:20;background:#0F0F0F}
+.accent-bar{height:3px;width:100%}
+.header-body{padding:14px 15px 12px;border-bottom:1px solid #222}
+.day-schedule{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:4px}
+.day-title{font-family:'Bebas Neue',cursive;font-size:44px;letter-spacing:.04em;line-height:1;margin-bottom:3px}
+.day-muscles{font-family:'Space Mono',monospace;font-size:10px;color:#5A5A5A;margin-bottom:12px}
+.progress-row{display:flex;align-items:center;gap:9px}
+.progress-track{flex:1;height:3px;background:#2A2A2A;border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;width:0%;border-radius:2px;transition:width .35s cubic-bezier(.34,1.56,.64,1)}
+.progress-label{font-family:'Space Mono',monospace;font-size:9px;color:#555;white-space:nowrap;min-width:42px;text-align:right}
+.week-strip{display:grid;grid-template-columns:repeat(7,1fr);background:#121212;border-bottom:1px solid #1E1E1E;padding:8px 10px;gap:0}
+.wk-cell{text-align:center;padding:0 2px}
+.wk-day{font-family:'Space Mono',monospace;font-size:8px;color:#3A3A3A;display:block;margin-bottom:2px;letter-spacing:.05em}
+.wk-type{font-family:'Space Mono',monospace;font-size:7px;color:#2E2E2E;display:block;letter-spacing:.03em;text-transform:uppercase}
+.wk-cell.today .wk-day{color:var(--accent)}
+.wk-cell.today .wk-type{color:var(--accent);font-weight:700}
+.section{padding:14px 14px 0}
+.section-head{font-family:'Bebas Neue',cursive;font-size:11.5px;letter-spacing:.2em;color:var(--accent);margin-bottom:9px;display:flex;align-items:center;gap:8px}
+.section-head::after{content:'';flex:1;height:1px;background:#222}
+/* Sub-section divider within exercise list */
+.sub-head{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.18em;color:#353535;text-transform:uppercase;padding:10px 2px 3px;display:flex;align-items:center;gap:7px}
+.sub-head::after{content:'';flex:1;height:1px;background:#1C1C1C}
+.cb{appearance:none;-webkit-appearance:none;width:22px;height:22px;border:2px solid #333;border-radius:5px;cursor:pointer;flex-shrink:0;position:relative;background:#161616;transition:background .15s,border-color .15s}
+.cb:checked{background:var(--accent);border-color:var(--accent)}
+.cb:checked::after{content:'';position:absolute;left:5px;top:2px;width:6px;height:10px;border:2.5px solid #111;border-top:none;border-left:none;transform:rotate(40deg)}
+.warmup-list{list-style:none;display:flex;flex-direction:column;gap:5px;margin-bottom:16px}
+.wu-item{display:flex;align-items:center;gap:10px;padding:8px 11px;background:#191919;border:1px solid #252525;border-radius:7px;transition:opacity .2s}
+.wu-item.done{opacity:.4}
+.wu-item label{font-size:13px;cursor:pointer;user-select:none;flex:1;line-height:1.35}
+.ex-list{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+.ex-group{display:flex;flex-direction:column;gap:5px}
+.superset-group{border-left:3px solid var(--accent);padding-left:9px}
+.superset-label{font-family:'Space Mono',monospace;font-size:8.5px;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;padding:2px 0 3px;opacity:.85}
+.ex-card{background:#191919;border:1px solid #252525;border-radius:8px;padding:11px 12px 10px;display:flex;gap:11px;transition:opacity .25s,border-color .25s}
+.ex-card.done{opacity:.4;border-color:#1E1E1E}
+.ex-card.backoff{background:#141414;margin-top:2px;border-top-color:#1E1E1E}
+.ex-check{padding-top:1px;flex-shrink:0}
+.ex-body{flex:1;min-width:0}
+.ex-num{font-family:'Space Mono',monospace;font-size:8.5px;color:#444;margin-bottom:3px;letter-spacing:.06em;text-transform:uppercase}
+.ex-name{font-weight:600;font-size:14px;line-height:1.3;margin-bottom:6px}
+.ex-name .fnref{color:var(--accent);font-family:'Space Mono',monospace;font-size:9.5px;vertical-align:super;font-weight:400;margin-left:1px}
+.ex-pills{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.pill{font-family:'Space Mono',monospace;font-size:9.5px;padding:2px 7px;border-radius:4px;background:#1F1F1F;border:1px solid #2A2A2A;color:#AAA;white-space:nowrap}
+.pill-rpe{color:var(--accent);background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08)}
+.pill-rest{color:#7AABFF;background:rgba(122,171,255,.05);border-color:rgba(122,171,255,.12)}
+.ex-note{font-size:11.5px;color:#6A6A6A;line-height:1.45;font-style:italic}
+.weight-row{display:flex;align-items:center;gap:7px;margin-top:8px;padding-top:8px;border-top:1px solid #222}
+.wlog-lbl{font-family:'Space Mono',monospace;font-size:8.5px;color:#444;white-space:nowrap;text-transform:uppercase;letter-spacing:.05em}
+.wlog-input{flex:1;background:#111;border:1px solid #2A2A2A;border-radius:4px;padding:3px 8px;font-family:'Space Mono',monospace;font-size:11px;color:#EBEBEB;outline:none;transition:border-color .15s;min-width:0}
+.wlog-input:focus{border-color:var(--accent)}
+.wlog-input::placeholder{color:#383838}
+.footnotes{padding:4px 14px 20px}
+.fn-head{font-family:'Bebas Neue',cursive;font-size:11.5px;letter-spacing:.2em;color:#444;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.fn-head::after{content:'';flex:1;height:1px;background:#1E1E1E}
+.fn-item{padding:8px 0;border-bottom:1px solid #1C1C1C;font-size:11.5px;line-height:1.5}
+.fn-item:last-child{border-bottom:none}
+.fn-badge{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;background:#1E1E1E;border-radius:3px;font-family:'Space Mono',monospace;font-size:8.5px;font-weight:700;color:var(--accent);margin-right:6px;flex-shrink:0;vertical-align:middle}
+.fn-ex{font-weight:600;color:#CCC}
+.fn-alts{color:#555;display:block;margin-top:2px;padding-left:23px;line-height:1.55}
+.reset-wrap{padding:6px 14px 0;text-align:right}
+.reset-btn{background:none;border:1px solid #222;color:#444;border-radius:5px;padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;transition:border-color .15s,color .15s}
+.reset-btn:hover{border-color:var(--accent);color:var(--accent)}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;background:#090909;border-top:1px solid #1E1E1E;z-index:100;height:64px}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border:none;background:none;cursor:pointer;padding:8px 4px;color:#3C3C3C;transition:color .18s;position:relative}
+.nav-item::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;border-radius:0 0 2px 2px;background:transparent;transition:background .18s}
+.nav-item.active{color:var(--item-color)}
+.nav-item.active::after{background:var(--item-color)}
+.nav-day{font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:.04em;line-height:1}
+.nav-lbl{font-family:'Space Mono',monospace;font-size:7.5px;letter-spacing:.05em;text-transform:uppercase;line-height:1}
+@media print{
+  .bottom-nav,.week-strip,.reset-wrap{display:none!important}
+  body{background:#fff;color:#000;max-width:none}
+  .page{display:block!important;page-break-after:always}
+  .day-header{position:static}
+  .accent-bar{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .pill-rpe,.fn-badge{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const DAYS = [
+  // ─── DAY 1 · MONDAY · PUSH ────────────────────────────────
+  {
+    id:'mon', dayLabel:'Monday', name:'PUSH',
+    muscles:'Chest · Shoulders · Triceps · Core & Serratus',
+    accent:'#FF6B35', weekSlot:0,
+    warmup:[
+      '5–10 min cardio — treadmill or StairMaster',
+      '10 arm circles, each side',
+      '10 cable external rotations, each side (light load)',
+      'Arm swings — 10 reps each direction',
+      'Dynamic chest openers × 10'
+    ],
+    exercises:[
+      // ── CHEST COMPOUNDS ──
+      {num:'1', name:'Flat Barbell Bench Press', fn:1, sub:'Chest Compounds',
+       sets:'1 top set × 3–5 reps', rpe:'RPE 8–9', rest:'3–4 min',
+       note:'Full warm-up pyramid before top set. Slight elbow tuck on descent; explosive on press. Spotter recommended.'},
+      {num:'1b', name:'Larson Press — Back-off Sets', fn:1, backoff:true,
+       sets:'2 × 10 reps', rpe:'RPE 8–9', rest:'2–3 min',
+       note:'~75% of top-set weight. Feet flat up on bench (no leg drive). Slightly closer grip. Smooth 1–2s tempo.'},
+      {num:'2', name:'Weighted Dip', fn:28,
+       sets:'3 × 6–10 reps', rpe:'RPE 8–9', rest:'2–3 min',
+       note:'Lean torso ~30° forward to bias the lower pec / sternal head. Use dip belt + plates. 3-sec eccentric on descent. Also hits tricep long head in the shortened position — the range missing from the overhead extensions.'},
+      // ── SHOULDERS ──
+      {num:'3', name:'Standing DB Arnold Press', fn:2, sub:'Shoulders',
+       sets:'3 × 8–10 reps', rpe:'RPE 8–9', rest:'2–3 min',
+       note:'Palms-in start → rotate to palms-forward as you press overhead. Belt + wrist straps recommended for heavier loads.'},
+      // ── CHEST ISOLATION ──
+      {num:'4a', name:'Cable Press-Around', fn:3, sub:'Chest Isolation',
+       sets:'2 × 12–15 reps', rpe:'RPE 9–10', rest:'No rest → 4b',
+       note:'One arm at a time. Press past the midline for full pec contraction at end range. Cable at mid-chest height.',
+       ssLabel:'SUPERSET A1 — no rest before A2'},
+      {num:'4b', name:'Static Pec Stretch', fn:null,
+       sets:'2 × 30s hold (each side)', rpe:'7/10 intensity', rest:'1 min after both sides',
+       note:'Hold just before the point of pain. Both sides count as one set. Stretch between sets for hypertrophic benefit.',
+       ssLabel:'SUPERSET A2'},
+      // ── LATERAL DELTS ──
+      {num:'5', name:'Crossbody Cable Y-Raise', fn:4, sub:'Lateral Delts',
+       sets:'3 × 12–15 reps', rpe:'RPE 9–10', rest:'1–2 min',
+       note:'Cable at hip-height; wrist cuff. Draw arm across body (sword draw) → flick up & out diagonally. NOT a front raise — the diagonal path hits D4/D5 delt segments.'},
+      // ── TRICEPS ──
+      {num:'6a', name:'Squeeze-Only Tricep Pressdown', fn:5, sub:'Triceps',
+       sets:'3 × 8 partial reps', rpe:'RPE 9–10', rest:'No rest → 6b',
+       note:'TOP HALF of range only — the hardest, most contracted zone. Rope attachment on cable.',
+       ssLabel:'SUPERSET B1 — no rest before B2'},
+      {num:'6b', name:'Stretch-Only Overhead Tricep Extension', fn:5,
+       sets:'3 × 8 partial reps', rpe:'RPE 9–10', rest:'1–2 min',
+       note:'BOTTOM HALF of range only — maximum overhead stretch position. Together, 6a + 6b cover the full ROM of the triceps long head.',
+       ssLabel:'SUPERSET B2'},
+      {num:'7', name:'Crossbody Cable Tricep Extension', fn:6,
+       sets:'2 × 10–12 reps', rpe:'RPE 10', rest:'1–2 min',
+       note:'Arm crosses body at an unconventional angle. Long head emphasis through varied shoulder position.'},
+      // ── CORE & SERRATUS ──
+      {num:'8', name:'Ab Wheel Rollout', fn:29, sub:'Core & Serratus',
+       sets:'3 × to technical failure', rpe:'RPE 9', rest:'1–2 min',
+       note:'Keep hips level — do not let them pike or sag. Roll out as far as form allows; return by flexing the abs and lats together. Serratus anterior + anti-extension core. Nippard\'s top serratus exercise.'},
+      {num:'9', name:'Half-Kneeling Pallof Press', fn:30,
+       sets:'3 × 10 reps / side', rpe:'RPE 7–8', rest:'1 min between sides',
+       note:'Cable at shoulder height, body perpendicular to machine. Press out and hold briefly; resist the cable rotating you. Anti-rotation core — obliques and transverse abdominis.'}
+    ],
+    footnotes:[
+      {n:1,  ex:'Bench Press / Larson Press',          alts:'No barbell or bench → Flat DB Bench Press · Machine Chest Press · Weighted Dips'},
+      {n:2,  ex:'Arnold Press',                         alts:'No dumbbells → Machine Shoulder Press · Barbell OHP · Band Overhead Press · Pike Push-ups'},
+      {n:3,  ex:'Cable Press-Around',                   alts:'No cables → Band Press-Around (anchor at chest height) · Single-arm DB Squeeze Press · Pec Deck with full squeeze past midline'},
+      {n:4,  ex:'Crossbody Cable Y-Raise',              alts:'No cables → Band Crossbody Y-Raise · Lean-away DB Lateral Raise · Lying Incline DB Lateral Raise'},
+      {n:5,  ex:'Triceps Squeeze/Stretch Superset',     alts:'No cables → Band Pressdown (top-half) + DB or Band Overhead Extension (bottom-half) — same partial-rep logic applies'},
+      {n:6,  ex:'Crossbody Cable Tricep Extension',     alts:'No cables → Band Crossbody Extension · Single-arm DB Overhead Extension at varied shoulder angles'},
+      {n:28, ex:'Weighted Dip',                         alts:'No dip station → Close-grip Push-up with weight vest · Machine Chest Dip · Decline DB Press (lower pec)'},
+      {n:29, ex:'Ab Wheel Rollout',                     alts:'No wheel → Barbell rollout (same motion) · Long-lever plank · TRX fallout · Pike on sliders or a towel'},
+      {n:30, ex:'Half-Kneeling Pallof Press',           alts:'No cable → Band Pallof Press (anchor to rack or door frame) · Dead bug · Hollow body hold'}
+    ]
+  },
+
+  // ─── DAY 2 · WEDNESDAY · PULL ───────────────────────────────
+  {
+    id:'wed', dayLabel:'Wednesday', name:'PULL',
+    muscles:'Back · Rear Delts · Biceps · Brachialis · Forearms · Core',
+    accent:'#22D3B0', weekSlot:2,
+    warmup:[
+      '5 min cardio — treadmill or StairMaster',
+      '10 arm circles, each side',
+      '10 cable external rotations, each side (light load)',
+      '10 band pull-aparts (or light face pulls)'
+    ],
+    exercises:[
+      // ── LOWER TRAP ACTIVATION ──
+      {num:'1', name:'Prone Trap Raise', fn:31, sub:'Lower Trap Activation',
+       sets:'2–3 × 12–15 reps', rpe:'RPE 7–8', rest:'1 min',
+       note:'Lie face-down on a low incline bench. Light DBs, thumbs pointing up. Raise arms into a "Y" shape. Mind-muscle focus on lower traps — upper-trap-dominant lifters may not feel this at first. Nippard recommends 2–3×/week.'},
+      // ── BACK & LATS ──
+      {num:'2', name:'Lat Pulldown — Feeder Sets', fn:7, sub:'Back & Lats',
+       sets:'4 × 10 reps (RPE 5 → 6 → 8 → 10)', rpe:'Increasing', rest:'1–2 min between',
+       note:'Medium overhand grip (~1–1.5× shoulder width). 4th feeder set = true failure. Use straps on heavier sets. Allow a slight natural lean.'},
+      {num:'2b', name:'Lat Pulldown — Working Sets + Drop Set', fn:7, backoff:true,
+       sets:'2 × to failure + 1 mini drop set', rpe:'RPE 10', rest:'2–3 min',
+       note:'Aim to match reps on 2nd set. Immediately drop weight 30% after 2nd failure set → 4–5 extra reps to fully exhaust the lats.'},
+      {num:'3', name:'Omni-Grip Chest-Supported Row', fn:8,
+       sets:'3 × 10–12 reps', rpe:'RPE 8', rest:'2–3 min',
+       note:'Set 1: wide overhand · Set 2: narrow overhand · Set 3: neutral or underhand. Actively squeeze shoulder blades together at peak contraction.'},
+      {num:'4a', name:'Bottom-Half DB Lat Pullover', fn:9,
+       sets:'2 × 10–12 reps', rpe:'RPE 8', rest:'No rest → 4b',
+       note:'Stay in the lengthened (bottom) range only — virtually zero tension on lats at the top of the movement.',
+       ssLabel:'SUPERSET A1 — no rest before A2'},
+      {num:'4b', name:'Static Lat Stretch', fn:null,
+       sets:'2 × 30s per side', rpe:'7/10 intensity', rest:'30s between sides',
+       note:'Grab a fixed bar or rack upright. Lean hips away. Alternate which side stretches first between supersets.',
+       ssLabel:'SUPERSET A2'},
+      // ── REAR DELTS ──
+      {num:'5', name:'Omni-Direction Face Pull', fn:10, sub:'Rear Delts',
+       sets:'3 × 12–15 reps', rpe:'RPE 8–9', rest:'1–2 min',
+       note:'Set 1: cable low → pull high · Set 2: cable at shoulder height → straight back · Set 3: cable high → pull to eyes. Three cable heights hit the rear delt from different angles.'},
+      {num:'6', name:'Reverse Cable Crossover', fn:32,
+       sets:'3 × 15–20 reps', rpe:'RPE 9', rest:'1–2 min',
+       note:'Nippard\'s S-tier rear-delt exercise. Hold the cable balls — not the handles — for smoother motion. Let arms cross fully at the front for a deep cross-body stretch. This loaded-stretch angle is not available with face pulls or reverse pec deck.'},
+      // ── BICEPS & ARMS ──
+      {num:'7', name:'EZ Bar Bicep Curl', fn:11, sub:'Biceps & Arms',
+       sets:'3 × 6–8 reps', rpe:'RPE 8–9', rest:'2 min',
+       note:'Progressive overload — track and beat weight/reps each week. Slight hip drive on the positive is fine; fully control the negative every rep.'},
+      {num:'8', name:'Preacher Hammer Curl', fn:33,
+       sets:'3 × 10–15 reps', rpe:'RPE 8–9', rest:'1–2 min',
+       note:'Neutral grip on a preacher bench. Full stretch at the bottom of each rep. Primary targets: brachialis (adds arm thickness beneath the bicep peak) and brachioradialis. Nippard: "the brachioradialis is huge and SO important for arm mass. Preacher hammer curls are the best way to grow it."'},
+      {num:'9', name:'Reverse-Grip Barbell Curl', fn:34,
+       sets:'3 × 10–15 reps', rpe:'RPE 8–9', rest:'1–2 min',
+       note:'Pronated (overhand) grip; thumbless for better feel. The pronated position neutralises the bicep, making the brachioradialis the primary mover. Control the eccentric — avoid swinging.'},
+      {num:'10', name:'Bottom-Half Preacher Curl', fn:12,
+       sets:'2 × 10–12 reps', rpe:'RPE 7–8', rest:'1–2 min',
+       note:'Unilateral. Start with weaker arm and match reps on the stronger. Bottom half only — the lengthened position proved ~2× more hypertrophic than the top half in research cited by Nippard.'},
+      // ── FOREARMS ──
+      {num:'11a', name:'DB Bench-Braced Wrist Curl', fn:35, sub:'Forearms',
+       sets:'3 × 10–12 reps', rpe:'RPE 8', rest:'No rest → 11b',
+       note:'Forearm resting on bench, wrist hanging over the edge. Thumbless grip. On the eccentric, let the DB roll out to the fingertips for a full stretch before curling back. Wrist flexors (palmaris longus, flexor carpi).',
+       ssLabel:'SUPERSET B1 — no rest before B2'},
+      {num:'11b', name:'Standing DB Wrist Extension', fn:36,
+       sets:'3 × 10–12 reps', rpe:'RPE 8', rest:'30s',
+       note:'DBs at sides with palms facing back. Flex wrists upward against the weight. Slow and controlled — no momentum. Wrist extensors (extensor carpi radialis/ulnaris). Directly counterbalances the wrist curl.',
+       ssLabel:'SUPERSET B2'},
+      {num:'12', name:'Plate Pinch', fn:37,
+       sets:'3 × max hold (target: 60s)', rpe:'RPE 9–10', rest:'1 min',
+       note:'Two weight plates held smooth-side out, pinched between thumb and four fingers. Add weight once 60s is comfortably held. Builds pinch-grip strength and thumb flexors.'},
+      // ── CORE ──
+      {num:'13', name:'Suitcase Carry', fn:38, sub:'Core',
+       sets:'3 × 30–40 m / side', rpe:'RPE 8', rest:'1 min between sides',
+       note:'Heavy DB or KB in one hand only. Walk tall — resist the urge to lean toward the weight. Core braced throughout. Anti-lateral-flexion: targets obliques and quadratus lumborum. The loaded carry is also a natural grip finisher.'}
+    ],
+    footnotes:[
+      {n:7,  ex:'Lat Pulldown',                         alts:'No machine → Pull-ups (EMG research shows near-identical lat activation) · Band-assisted Pull-ups · Band Lat Pulldown (anchor overhead)'},
+      {n:8,  ex:'Chest-Supported Row',                  alts:'No machine → DB Chest-Supported Row (chest on incline bench) · T-Bar Row · Pendlay / Barbell Row · Inverted Row'},
+      {n:9,  ex:'DB Lat Pullover',                      alts:'No dumbbell → Band Straight-arm Pulldown · Cable Straight-arm Pulldown'},
+      {n:10, ex:'Face Pull',                            alts:'No cables → Band Face Pull (anchor at face height) · Bent-over DB Reverse Fly · Prone Y-T-W Raises on a bench'},
+      {n:11, ex:'EZ Bar Curl',                          alts:'No EZ bar → Dumbbell Curls (allows natural supination) · Straight Barbell Curl · Band Curl · Chin-ups'},
+      {n:12, ex:'Preacher Curl',                        alts:'No preacher bench → DB Preacher Curl over incline bench · Spider Curl (chest on incline) · Concentration Curl · Incline DB Curl'},
+      {n:31, ex:'Prone Trap Raise',                     alts:'No incline bench → Prone floor Y-raise (lying flat) · Band Y-raise · Cable face-down Y-raise'},
+      {n:32, ex:'Reverse Cable Crossover',              alts:'No cables → Bent-over DB rear delt fly (let arms cross at the top) · Band rear delt pull-apart (cross-body) · Prone incline reverse fly'},
+      {n:33, ex:'Preacher Hammer Curl',                 alts:'No preacher bench → Incline DB hammer curl (60–70°) · Seated DB hammer curl · Cable rope hammer curl'},
+      {n:34, ex:'Reverse-Grip Barbell Curl',            alts:'No barbell → Reverse DB curl · Reverse-grip cable curl · Zottman curl (combo: supinate up, pronate down)'},
+      {n:35, ex:'DB Bench-Braced Wrist Curl',           alts:'No dumbbell → Barbell wrist curl · Band wrist curl (anchor underfoot) · Plate wrist curl'},
+      {n:36, ex:'Standing DB Wrist Extension',          alts:'No dumbbell → Barbell wrist extension · Band wrist extension'},
+      {n:37, ex:'Plate Pinch',                          alts:'No plates → DB head pinch · Thick-towel-wrapped bar grip · Rice-bucket crush grip'},
+      {n:38, ex:'Suitcase Carry',                       alts:'No heavy implement → Lighter DB or KB carry · Bilateral farmer\'s carry (both hands) · Side plank static hold (stationary anti-lateral-flexion)'}
+    ]
+  },
+
+  // ─── DAY 3 · FRIDAY · UPPER ────────────────────────────────
+  {
+    id:'fri', dayLabel:'Friday', name:'UPPER',
+    muscles:'Chest · Back · Shoulders · Biceps · Triceps · Core',
+    accent:'#FFD23F', weekSlot:4,
+    warmup:[
+      '5 min cardio — treadmill or StairMaster',
+      '10 arm circles, each side',
+      '10 cable external rotations, each side (light load)',
+      'Shoulder pass-throughs × 10 (with band or stick)'
+    ],
+    exercises:[
+      // ── CHEST ──
+      {num:'1', name:'Close-Grip Barbell Incline Bench', fn:13, sub:'Chest',
+       sets:'3 sets: ×8 (moderate) → ×5 (heavier) → ×15 (lighter)', rpe:'RPE 8 / 9 / 7', rest:'3–4 min',
+       note:'Grip just outside shoulder-width. Bar to upper chest; press straight up. This keeps the upper-chest pressing anchor from the original second push day while reducing redundant chest isolation volume for a balanced full upper session.'},
+      // ── BACK ──
+      {num:'2', name:'Omni-Grip Chest-Supported Row', fn:8, sub:'Back',
+       sets:'3 × 10–12 reps', rpe:'RPE 8', rest:'2–3 min',
+       note:'Set 1: wide overhand · Set 2: narrow overhand · Set 3: neutral or underhand. Adds the horizontal pull missing from the old second push day so the upper session covers the mid-back, rhomboids, and lats.'},
+      {num:'3', name:'Lat Pulldown', fn:7,
+       sets:'3 × 10–12 reps', rpe:'RPE 8–9', rest:'2–3 min',
+       note:'Medium overhand grip (~1–1.5× shoulder width). Pull elbows down toward the hips and allow a slight natural lean. Vertical pulling completes lat and teres coverage without needing a separate teres isolation movement.'},
+      // ── SHOULDERS ──
+      {num:'4', name:'Machine Shoulder Press', fn:14, sub:'Shoulders',
+       sets:'3 × 10–12 reps', rpe:'RPE 9 / 9 / 10', rest:'2–3 min',
+       note:'Thumbless grip. Constant tension — do not lock out at the top. Seat high enough for deep ROM. Retained from the original day as the main overhead pressing movement for front delts and triceps.'},
+      {num:'5', name:'Machine Lateral Raise', fn:17, sub:'Lateral Delts',
+       sets:'3 × 20 reps', rpe:'RPE 9–10', rest:'1–2 min',
+       note:'First 5 reps: 5-sec eccentric to lock in the mind-muscle connection. Reps 6–20: smooth 1s up / 1s down. Kept because side delts do not get enough direct work from pressing alone.'},
+      // ── ARMS ──
+      {num:'6', name:'Floor Reset Skull Crusher', fn:15, sub:'Arms',
+       sets:'3 × 6–8 reps', rpe:'RPE 8–9', rest:'2 min',
+       note:'EZ bar. Control the negative to the floor. Full dead-stop. Roll slightly back to build reset momentum. Keeps a dedicated triceps movement without the extra redundancy of pairing it with another triceps-dominant dip on the same upper day.'},
+      {num:'7', name:'EZ Bar Bicep Curl', fn:11,
+       sets:'3 × 6–8 reps', rpe:'RPE 8–9', rest:'2 min',
+       note:'Progressive overload — track and beat weight/reps each week. Slight hip drive on the positive is fine; fully control the negative every rep. Added to ensure direct elbow-flexor work on the full upper day.'},
+      // ── REAR DELTS / UPPER BACK ──
+      {num:'8', name:'Reverse Cable Crossover', fn:32, sub:'Rear Delts / Upper Back',
+       sets:'3 × 15–20 reps', rpe:'RPE 9', rest:'1–2 min',
+       note:'Hold the cable balls — not the handles — for smoother motion. Let arms cross fully at the front for a deep stretch. This covers rear delts from a cross-body angle that the original push-2 setup did not train.'},
+      // ── CORE ──
+      {num:'9', name:'Cable Woodchop (High-to-Low)', fn:40, sub:'Core',
+       sets:'3 × 10 reps / side', rpe:'RPE 8', rest:'1 min between sides',
+       note:'Cable set high. Pull diagonally down and across the body. Rotate through the full spine — not just the arms. Keep the hips stationary and facing forward. Primary target: obliques + rotational core.'}
+    ],
+    footnotes:[
+      {n:7,  ex:'Lat Pulldown',                         alts:'No machine → Pull-ups (EMG research shows near-identical lat activation) · Band-assisted Pull-ups · Band Lat Pulldown (anchor overhead)'},
+      {n:8,  ex:'Chest-Supported Row',                  alts:'No machine → DB Chest-Supported Row (chest on incline bench) · T-Bar Row · Pendlay / Barbell Row · Inverted Row'},
+      {n:11, ex:'EZ Bar Curl',                          alts:'No EZ bar → Dumbbell Curls (allows natural supination) · Straight Barbell Curl · Band Curl · Chin-ups'},
+      {n:13, ex:'Close-Grip Incline Bench',             alts:'No barbell or incline → Incline DB Press · Incline Push-up (feet elevated) · Band Incline Press'},
+      {n:14, ex:'Machine Shoulder Press',               alts:'No machine → Seated/Standing DB OHP · Barbell OHP · Band Overhead Press · Pike Push-ups'},
+      {n:15, ex:'Floor Reset Skull Crusher',            alts:'No barbell → DB Skull Crusher on bench · Overhead Cable/DB Extension · Band Overhead Extension'},
+      {n:17, ex:'Machine Lateral Raise',                alts:'No machine → DB Lateral Raise · Cable Lateral Raise · Band Lateral Raise (research: all ~equally effective)'},
+      {n:32, ex:'Reverse Cable Crossover',              alts:'No cables → Bent-over DB rear delt fly (let arms cross at the top) · Band rear delt pull-apart (cross-body) · Prone incline reverse fly'},
+      {n:40, ex:'Cable Woodchop',                       alts:'No cable → Band woodchop (anchor high to rack or door frame) · DB woodchop · Medicine ball rotational slam'}
+    ]
+  },
+
+  // ─── DAY 4 · SATURDAY · LOWER (same workouts as prior legs day) ────────────────────
+  {
+    id:'sat', dayLabel:'Saturday', name:'LOWER',
+    muscles:'Quads · Hamstrings · Glutes · Calves · Abs',
+    accent:'#8BFF47', weekSlot:5,
+    warmup:[
+      '5–10 min cardio — treadmill, StairMaster or bike',
+      'Front & back leg swings — 12/side',
+      'Side-to-side leg swings — 12/side',
+      'Bodyweight deep squats × 10 (slow, full depth)',
+      'Hip circles × 10/side',
+      'Light glute bridges × 10'
+    ],
+    exercises:[
+      {num:'1', name:'Barbell Back Squat — Top Set', fn:20,
+       sets:'1 × 2–4 reps', rpe:'RPE 8–9', rest:'3–4 min',
+       note:'~85–90% of 1RM. Full warm-up pyramid first (10@20%, 5@35%, 3@55%, 2@70%, 1@80%). Sit back and down; bar travels over mid-foot.'},
+      {num:'1b', name:'Barbell Paused Squat — Back-off Sets', fn:20, backoff:true,
+       sets:'2 × 5 reps', rpe:'RPE 8', rest:'3 min',
+       note:'~75% of top-set weight. 1–2 sec pause at full depth each rep. Explode out of the hole. Pausing removes elastic energy — builds raw quad and glute strength.'},
+      {num:'2', name:'Barbell Romanian Deadlift', fn:21,
+       sets:'3 × 8–10 reps', rpe:'RPE 8', rest:'2–3 min',
+       note:'Push hips straight back; bar travels in a straight vertical line. Slight knee bend OK; keep shin angle vertical. Reverse before lower back rounds.'},
+      {num:'3', name:'Dumbbell Walking Lunge', fn:22,
+       sets:'2 × 20 strides (10/leg per set)', rpe:'RPE 8–9', rest:'2 min',
+       note:'Knee softly contacts floor on every stride. Control the negative on descent. Use wrist straps if grip limits load before legs reach failure.'},
+      {num:'4', name:'Seated Leg Curl', fn:23,
+       sets:'3 × 10–12 reps', rpe:'RPE 8', rest:'1–2 min',
+       note:'Lean torso forward to load hamstrings in lengthened position. Set 1: toes out · Set 2: toes in · Set 3: toes straight ahead.'},
+      {num:'5', name:'Leg Press', fn:24,
+       sets:'3 × 10–12 reps', rpe:'RPE 8', rest:'1–2 min',
+       note:'Medium-low foot placement for quad emphasis. As deep as possible without lower back rounding. Maintain slight knee bend at top — constant tension approach.'},
+      {num:'6', name:'Slow Eccentric Leg Extension', fn:25,
+       sets:'3 × 8–10 reps', rpe:'RPE 8', rest:'1–2 min',
+       note:'3-second lowering phase on every rep (use lighter load than usual). Specifically targets the rectus femoris head — the quad head poorly activated by squats and leg press.'},
+      {num:'7', name:'Seated Calf Raise', fn:26,
+       sets:'4 × 15–20 reps', rpe:'RPE 8–9', rest:'1 min',
+       note:'Bent-knee position = soleus emphasis. Full stretch at the bottom of each rep; full contraction at the top. If standing machine also available, add 2–3 sets for gastroc.'},
+      {num:'8', name:'Roman Chair Leg Raise', fn:27,
+       sets:'3 × 10–20 reps', rpe:'RPE 9–10', rest:'1 min',
+       note:'Curl your lower back and actively SQUEEZE the abs — do not just lift the legs. Use bent knees if unable to complete 10 strict straight-leg reps. Add 2–3s eccentric if 20 reps feels easy.'}
+    ],
+    footnotes:[
+      {n:20, ex:'Barbell Back Squat',      alts:'No barbell or rack → Hack Squat · Bulgarian Split Squat · Goblet Squat · Smith Machine Squat. Adjust to 4–6 reps for substitution back-offs.'},
+      {n:21, ex:'Romanian Deadlift',       alts:'No barbell → Dumbbell RDL · Single-leg RDL · Kettlebell RDL · Banded RDL'},
+      {n:22, ex:'Walking Lunge',           alts:'No space → Reverse Lunge in place · Static Split Squat · Bulgarian Split Squat · Band Lunge'},
+      {n:23, ex:'Seated Leg Curl',         alts:'No seated machine → Lying Leg Curl (slightly less stretch, still effective) · Nordic Ham Curl (anchor feet under a barbell/sofa) · Swiss-ball Leg Curl · Slider Leg Curl'},
+      {n:24, ex:'Leg Press',               alts:'No machine → Hack Squat · Front Squat · Goblet Squat (heel-elevated if available) · Bulgarian Split Squat · Sissy Squat'},
+      {n:25, ex:'Slow Eccentric Leg Extension', alts:'No machine → Reverse Nordic Curl (kneeling lean-back — best bodyweight match) · Band Leg Extension · Sissy Squat · ATG Split Squat'},
+      {n:26, ex:'Seated Calf Raise',       alts:'No machine → Seated DB Calf Raise (plate weight on knees, toes on an elevated step) · Bent-knee Smith-machine raise. Pair with standing calf raises (straight-knee = gastrocnemius emphasis) for complete development.'},
+      {n:27, ex:'Roman Chair Leg Raise',   alts:'No Roman chair → Hanging Leg Raise (pull-up bar) · Captain\'s Chair Raise · Lying Floor Leg Raise · Decline Bench Leg Raise. Crunch substitute: Cable Crunch · Ab-wheel rollout · Weighted Floor Crunch.'}
+    ]
+  }
+];
+
+const WEEK=[
+  {lbl:'MON',type:'Push'},{lbl:'TUE',type:'Rest'},
+  {lbl:'WED',type:'Pull'},{lbl:'THU',type:'Rest'},
+  {lbl:'FRI',type:'Upper'},{lbl:'SAT',type:'Lower'},
+  {lbl:'SUN',type:'Rest'}
+];
+
+// ─── RENDER ─────────────────────────────────────────────────
+let activeDay=0;
+function uid(d,t,i){return`cb-${d}-${t}-${i}`;}
+
+function renderPage(day,di){
+  const wu=day.warmup.map((w,i)=>`
+    <li class="wu-item" id="wi-${day.id}-${i}">
+      <input class="cb" type="checkbox" id="${uid(day.id,'wu',i)}" data-day="${day.id}" data-type="wu" data-idx="${i}">
+      <label for="${uid(day.id,'wu',i)}">${w}</label>
+    </li>`).join('');
+
+  const exs=day.exercises;
+  let exHtml=''; let i=0;
+  while(i<exs.length){
+    const ex=exs[i];
+    // Section divider
+    const divider=ex.sub?`<div class="sub-head">${ex.sub}</div>`:'';
+    if(ex.ssLabel&&(ex.ssLabel.includes('A1')||ex.ssLabel.includes('B1'))){
+      let group=[ex]; let j=i+1;
+      while(j<exs.length&&exs[j].ssLabel){group.push(exs[j]);j++;}
+      exHtml+=divider+`<div class="ex-group superset-group" style="--accent:${day.accent}">
+        ${group.map((g,gi)=>`<span class="superset-label">${g.ssLabel||''}</span>${renderCard(g,day.id,di,gi+i)}`).join('')}
+      </div>`;
+      i=j;
+    }else{
+      exHtml+=divider+`<div class="ex-group">${renderCard(ex,day.id,di,i)}</div>`;
+      i++;
+    }
+  }
+
+  const fns=day.footnotes.map(f=>`
+    <div class="fn-item">
+      <span class="fn-badge">${f.n}</span>
+      <span class="fn-ex">${f.ex}</span>
+      <span class="fn-alts">→ ${f.alts}</span>
+    </div>`).join('');
+
+  const wkCells=WEEK.map((w,wi)=>`
+    <div class="wk-cell ${wi===day.weekSlot?'today':''}">
+      <span class="wk-day">${w.lbl}</span>
+      <span class="wk-type">${w.type}</span>
+    </div>`).join('');
+
+  return`
+  <div class="page ${di===0?'active':''}" id="page-${day.id}" style="--accent:${day.accent}">
+    <div class="page-inner">
+      <header class="day-header" style="--accent:${day.accent}">
+        <div class="accent-bar" style="background:${day.accent}"></div>
+        <div class="header-body">
+          <div class="day-schedule" style="color:${day.accent}">Day ${di+1} of 4 &nbsp;·&nbsp; ${day.dayLabel}</div>
+          <div class="day-title">${day.name}</div>
+          <div class="day-muscles">${day.muscles}</div>
+          <div class="progress-row">
+            <div class="progress-track"><div class="progress-fill" id="pf-${day.id}" style="background:${day.accent}"></div></div>
+            <div class="progress-label" id="pl-${day.id}">0 / 0</div>
+          </div>
+        </div>
+        <div class="week-strip">${wkCells}</div>
+      </header>
+      <div class="reset-wrap">
+        <button class="reset-btn" onclick="resetDay('${day.id}')">↺ Reset checklist</button>
+      </div>
+      <div class="section">
+        <div class="section-head">Warm-Up</div>
+        <ul class="warmup-list">${wu}</ul>
+      </div>
+      <div class="section">
+        <div class="section-head">Exercises</div>
+        <div class="ex-list">${exHtml}</div>
+      </div>
+      <div class="footnotes" style="--accent:${day.accent}">
+        <div class="fn-head">Equipment Alternatives</div>
+        <div class="fn-list">${fns}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderCard(ex,dayId,di,ei){
+  const cbId=uid(dayId,'ex',ei);
+  const fnRef=ex.fn?`<span class="fnref">[${ex.fn}]</span>`:'';
+  const rpeClass=(ex.rpe&&ex.rpe!=='—'&&!ex.rpe.startsWith('7'))?'pill-rpe':'pill';
+  const restClass=(ex.rest.includes('min')||ex.rest.includes('rest')||ex.rest.includes('No'))?'pill-rest':'pill';
+  const cardClass=`ex-card${ex.backoff?' backoff':''}`;
+  return`
+  <div class="${cardClass}" id="ec-${dayId}-${ei}">
+    <div class="ex-check">
+      <input class="cb" type="checkbox" id="${cbId}" data-day="${dayId}" data-type="ex" data-idx="${ei}">
+    </div>
+    <div class="ex-body">
+      <div class="ex-num">${ex.num}.</div>
+      <label class="ex-name" for="${cbId}">${ex.name}${fnRef}</label>
+      <div class="ex-pills">
+        <span class="pill">${ex.sets}</span>
+        <span class="${rpeClass}">${ex.rpe}</span>
+        <span class="${restClass}">Rest: ${ex.rest}</span>
+      </div>
+      <div class="ex-note">${ex.note}</div>
+      <div class="weight-row">
+        <span class="wlog-lbl">Weight / Notes</span>
+        <input class="wlog-input" type="text" placeholder="e.g. 80 kg × 5" id="wl-${dayId}-${ei}" oninput="saveWeight(this,'${dayId}',${ei})">
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderNav(){
+  return DAYS.map((d,i)=>`
+    <button class="nav-item ${i===0?'active':''}" id="nav-${d.id}"
+      style="--item-color:${d.accent}" onclick="switchDay(${i})">
+      <span class="nav-day">${d.dayLabel.slice(0,3).toUpperCase()}</span>
+      <span class="nav-lbl">${d.name}</span>
+    </button>`).join('');
+}
+
+function init(){
+  const root=document.getElementById('root');
+  root.innerHTML=`<div>${DAYS.map((d,i)=>renderPage(d,i)).join('')}</div>
+    <nav class="bottom-nav">${renderNav()}</nav>`;
+  loadAllState();
+  DAYS.forEach((_,i)=>updateProgress(i));
+  document.querySelectorAll('.cb').forEach(cb=>{cb.addEventListener('change',onCheck);});
+}
+
+function switchDay(i){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(`page-${DAYS[i].id}`).classList.add('active');
+  document.getElementById(`nav-${DAYS[i].id}`).classList.add('active');
+  activeDay=i; window.scrollTo(0,0);
+}
+
+function onCheck(e){
+  const cb=e.target;
+  const{day,type,idx}=cb.dataset;
+  const checked=cb.checked;
+  if(type==='wu'){
+    const li=document.getElementById(`wi-${day}-${idx}`);
+    if(li) li.classList.toggle('done',checked);
+  }else{
+    const card=document.getElementById(`ec-${day}-${idx}`);
+    if(card) card.classList.toggle('done',checked);
+  }
+  saveState(day);
+  const di=DAYS.findIndex(d=>d.id===day);
+  updateProgress(di);
+}
+
+function updateProgress(di){
+  const day=DAYS[di];
+  const cbs=document.querySelectorAll(`input.cb[data-day="${day.id}"]`);
+  const total=cbs.length;
+  const done=Array.from(cbs).filter(c=>c.checked).length;
+  const pf=document.getElementById(`pf-${day.id}`);
+  const pl=document.getElementById(`pl-${day.id}`);
+  if(pf) pf.style.width=total?(done/total*100)+'%':'0%';
+  if(pl) pl.textContent=`${done} / ${total}`;
+}
+
+function saveState(dayId){
+  const cbs=document.querySelectorAll(`input.cb[data-day="${dayId}"]`);
+  const state={};
+  cbs.forEach(cb=>{state[cb.id]=cb.checked;});
+  try{localStorage.setItem(`ppl-cb-${dayId}`,JSON.stringify(state));}catch(e){}
+}
+
+function saveWeight(input,dayId,idx){
+  try{localStorage.setItem(`ppl-wl-${dayId}-${idx}`,input.value);}catch(e){}
+}
+
+function loadAllState(){
+  DAYS.forEach(day=>{
+    try{
+      const raw=localStorage.getItem(`ppl-cb-${day.id}`);
+      if(raw){
+        const state=JSON.parse(raw);
+        Object.entries(state).forEach(([id,checked])=>{
+          const cb=document.getElementById(id);
+          if(cb&&checked){cb.checked=true;cb.dispatchEvent(new Event('change'));}
+        });
+      }
+    }catch(e){}
+    day.exercises.forEach((_,ei)=>{
+      try{
+        const val=localStorage.getItem(`ppl-wl-${day.id}-${ei}`);
+        const inp=document.getElementById(`wl-${day.id}-${ei}`);
+        if(val&&inp) inp.value=val;
+      }catch(e){}
+    });
+  });
+}
+
+function resetDay(dayId){
+  const cbs=document.querySelectorAll(`input.cb[data-day="${dayId}"]`);
+  cbs.forEach(cb=>{if(cb.checked){cb.checked=false;cb.dispatchEvent(new Event('change'));}});
+  const di=DAYS.findIndex(d=>d.id===dayId);
+  DAYS[di].exercises.forEach((_,ei)=>{
+    const inp=document.getElementById(`wl-${dayId}-${ei}`);
+    if(inp) inp.value='';
+    try{localStorage.removeItem(`ppl-wl-${dayId}-${ei}`);}catch(e){}
+  });
+  try{localStorage.removeItem(`ppl-cb-${dayId}`);}catch(e){}
+  updateProgress(di);
+}
+
+init();
+</script>
+</body>
+</html>
